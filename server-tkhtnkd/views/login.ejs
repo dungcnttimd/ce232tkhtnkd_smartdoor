@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
+    <script type="text/javascript" src="jquery.js"></script>
+    <link rel="stylesheet" href="module/bootstrap/dist/css/bootstrap.min.css">
+    <script src="module/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link href="login.css" rel="stylesheet">
+    <title>Login Page</title>
+  </head>
+  <body class="text-center"> 
+
+    <nav class="navbar navbar-expand-md navbar-fixed-top navbar-blue main-nav">
+      <a class="navbar-item h5 " href="/user/">HOME</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+
+    <p style="text-align:center;"><img class="header-center" src="Header_Page.png" alt="" width="600" height="140"> </p>
+
+    <form class="form-signin">
+      <div class="loginerrors">
+        <div class="alert alert-danger" role="alert" data-aria-autofocus="true">Please login!</div>
+      </div>
+      <label for="email" class="sr-only">Email</label><br />
+      <input type="text" id="email" class="form-control" placeholder="Email address" required autofocus /><br />
+      <label for="password" class="sr-only">Password</label><br />
+      <input type="password" id="password" class="form-control" placeholder="Password" required /><br />
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button><br />
+      <a href="/user/register">Don't have an account? Register</a>
+    </form>
+    
+    <script>
+      const form = document.querySelector('form')
+      const username = document.querySelector('#username')
+      const password = document.querySelector('#password')
+      const display = document.querySelector('.alert')
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        display.textContent = ''
+        try {
+          const res = await fetch('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email: email.value, password: password.value }),
+            headers: { 'Content-Type': 'application/json' }
+            })
+          const data = await res.json()
+          console.log(JSON.stringify(data) + " khi dang nhap")
+          if (res.status === 500 || res.status === 501 || res.status === 400) {
+            return display.textContent = `${data.message} ${data.error ? data.error : ''}`
+          }
+           else if (res.status===200){ 
+            data.role === "admin" ? location.assign('/user/admin') : location.assign('/user/basicUser')    
+            return display.textContent = `${data.message} ${data.error ? data.error : ''}`
+          }
+        //  console.log(data.role + " khi dang nhap")
+        //   if(data.role ==="admin")
+        //   location.assign('/user/admin')
+        //   else location.assign('/user/basicUser')
+        } catch (err) {
+            console.log(err.message)
+          }
+        })
+      </script>
+  </body>
+</html>

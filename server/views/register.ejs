@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <link rel="stylesheet" href="module/bootstrap/dist/css/bootstrap.min.css">
+    <script src="module/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link href="register.css" rel="stylesheet">
+    <title>Register Page</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-fixed-top navbar-blue main-nav">
+      <a class="navbar-item h5" href="/user/">HOME</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+    <p style="text-align:center; "><img class="header-center" src="Header_Page.png" alt="" width="600" height="140"> </p>
+    <form class="form-register">   
+      <div class="registerremind">
+        <div class="alert alert-secondary text-center h5 mb-1" role="alert" data-aria-autofocus="true">Registration Form</div>
+      </div>
+      <div class="error text-center mt-3" style="background-color: #f8d7da;"  ></div>
+      <label for="name" class="mt-1 form-label" >Full name:</label><br />
+      <input type="text" id="name" placeholder="Enter your name" class="form-control" required /><br />
+      <label for="email" class="form-label" >Email:</label><br />
+      <input type="text" id="email" placeholder="Enter your email" class="form-control" required /><br />
+      <label for="password" class="form-label" >Password:</label><br />
+      <input type="password" id="password" placeholder="Enter your password" class="form-control" required /> <br />
+      <label for="cfpassword" class="form-label" >Confirmation Password:</label><br />
+      <input type="password" id="cfpassword" placeholder="Retype password" class="form-control" required /> <br />
+      <label for="phone" class="form-label" >Phone number:</label><br />
+      <input type="text" id="phone" placeholder="Enter your phone" class="form-control" required /><br />
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button><br />
+      <a href="/user/login">Already registered? Login</a>
+    </form>
+    
+    <script>
+        const form = document.querySelector('form')
+        const email = document.querySelector('#email')
+        const cfpassword = document.querySelector('#cfpassword')
+        const password = document.querySelector('#password')
+        const name = document.querySelector('#name')
+        const phone = document.querySelector('#phone')
+        const display = document.querySelector('.error')
+        form.addEventListener('submit', async (e) => {
+           e.preventDefault()
+           if (password.value != cfpassword.value) return display.textContent = "The password and confirmation password do not match!";
+            else{
+           display.textContent = "";
+           try {
+             const res = await fetch('/auth/register', {
+             method: 'POST',
+              body: JSON.stringify({ name: name.value , email: email.value, password: password.value, phone:phone.value}),
+             headers: { 'Content-Type': 'application/json' }
+             })
+             const data = await res.json()
+             console.log (data.role + "role khi dang ky ne")
+             if (res.status === 500 || res.status === 400) {
+              return display.textContent = `${data.message} ${data.error ? data.error : ''}`
+              }
+              else { 
+                //data.role === "admin" ? location.assign('/user/admin') : location.assign('/user/basicUser')    
+               location.assign('/user/login') 
+              //  return display.textContent = `${data.message} ${data.error ? data.error : ''}`
+              }
+       
+              } catch (err) {
+                console.log(err.message)
+                //alert(err)
+              }
+            }
+            })
+          
+            
+      </script>
+  </body>
+</html>

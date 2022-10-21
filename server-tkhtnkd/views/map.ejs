@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css"
+    integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+
+
+
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css' rel='stylesheet' />
+
+  <title>Store Locator</title>
+</head>
+
+<body>
+  <style>
+    .marker {
+      display: block;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 0;
+    }
+  </style>
+  <div class="container my-3">
+    <h1 class="display-4 text-center">
+      <i class="fas fa-map-marked mr-4"></i>Store Locator
+    </h1>
+    <div id="map" style="width: 100%; height: 500px;border-radius: 5px;"></div>
+  </div>
+
+
+  <script>
+    // var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+    mapboxgl.accessToken = 'pk.eyJ1IjoibmdvbWFuZGF0MjM0IiwiYSI6ImNsM2w3eGlhdjBxbmwzY283bnZjbG54bWYifQ.ICEaAO9TWXnuM4eEKZiiCg';
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      style: 'mapbox://styles/mapbox/streets-v11', // style URL
+      center: [106.70062, 10.77411], // starting position [lng, lat]
+      zoom: 9 // starting zoom
+    });
+
+    async function getStores(e) {
+      const res = await fetch('/user/getMap');
+      const data = await res.json();
+      console.log("data ne " + data)
+      const stores = data.data.map(store => {
+        //const images = store.addImage('custom-marker', image);
+
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [
+              store.location.coordinates[0],
+              store.location.coordinates[1]
+            ]
+          },
+          properties: {
+            storeId: store.storeId,
+            icon: 'shop',
+            // name : "Location A",
+            // category: "House"
+            //icon:marker1
+            // title: "Dat Dep try"
+          },
+        };
+      });
+      loadMap(stores);
+
+    }
+
+    // Load map with stores
+    function loadMap(stores) {
+      map.on('load', function () {
+        map.addLayer({
+          id: 'points',
+          type: 'symbol',
+          source: {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: stores
+            }
+          },
+          layout: {
+            'icon-image': '{icon}-15',
+            'icon-size': 1.5,
+            'text-field': '{storeId}',
+            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            'text-offset': [0, 0.9],
+            'text-anchor': 'top'
+          }
+        });
+      });
+    }
+
+    getStores();
+  </script>
+  <script type="text/javascript" src="/public/map.js"></script>
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"
+    integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
+<!-- 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Add markers to a web map with a symbol layer</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+<body>
+  
+<div style="width: 100%; height: 500px;border-radius: 5px;"  id="map"></div>
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoibmdvbWFuZGF0MjM0IiwiYSI6ImNsM2w3eGlhdjBxbmwzY283bnZjbG54bWYifQ.ICEaAO9TWXnuM4eEKZiiCg';
+const map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/light-v10',
+center: [106.70062, 10.77411],
+zoom: 10
+});
+function loadMap(stores) {
+map.on('load', () => {
+// Add an image to use as a custom marker
+map.loadImage(
+'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+(error, image) => {
+if (error) throw error;
+map.addImage('custom-marker', image);
+// Add a GeoJSON source with 2 points
+map.addSource('points', {
+'type': 'geojson',
+'data': {
+'type': 'FeatureCollection',
+'features': [
+{
+// feature for Mapbox DC
+'type': 'Feature',
+'geometry': {
+'type': 'Point',
+'coordinates': [
+106.800836, 10.870231
+]
+},
+'properties': {
+'title': 'Dat dep try'
+}
+},
+
+]
+}
+});
+ 
+// Add a symbol layer
+map.addLayer({
+'id': 'points',
+'type': 'symbol',
+'source': 'points',
+'layout': {
+'icon-image': 'custom-marker',
+// get the title name from the source's "title" property
+'text-field': ['get', 'title'],
+'text-font': [
+'Open Sans Semibold',
+'Arial Unicode MS Bold'
+],
+'text-offset': [0, 1.25],
+'text-anchor': 'top'
+}
+});
+}
+);
+});
+}
+async function getStores() {
+  const res = await fetch('/user/getMap');
+  const data = await res.json();
+
+  const stores = data.data.map(store => {
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          store.location.coordinates[0],
+          store.location.coordinates[1]
+        ]
+      },
+      properties: {
+        storeId: store.storeId,
+        icon: 'shop'
+      }
+    };
+  });
+
+  loadMap(stores);
+}
+getStores()
+</script>
+ 
+</body>
+</html> -->
